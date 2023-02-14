@@ -1,0 +1,41 @@
+#config file for parameters
+saving:
+  model_name: 'h_test'
+
+comments:
+  alt_name: 'ss_20_p1'
+
+shape:
+  ymax: 1000
+  xmax: 3000
+  dxy: 10 #spacing
+
+geomorphology:
+  uplift_rate: 9.0e-5
+  Sc: 0.7 #critical slope for hillslope diffusion
+  Hstar: 0.1 # characteristic transport depth, m
+  V0: 0.1 #0.1 #transport velocity coefficient, D: Hstar*V0 #effective(maximum) diffusivity
+  P0: 1e-4 #1e-4 #maximum soil production rate
+  run_off: 0.5 #run off rate
+  K_sed: 0.000067 #1e-05 #sediment erodibility
+  K_br: 0.000053 #8e-06 #bedrock erodibility
+  F_f: 0.5 #fraction of fine sediment
+  phi: 0.5 #sediment porosity
+  H_star: 0.1 #sediment entrainment lenght scale
+  Vs: 1.0 #velocity of sediment
+  m_sp: 0.5 #exponent ondrainage area stream power
+  n_sp: 1.0 #exponent on channel slope in the stream power framework
+  sp_crit_sed: 0.0 #sediment erosion threshold
+  sp_crit_br: 0.0 #bedrock erosion threshold
+
+tectonics:
+  total_slip: 3000.0
+  method: 'roll' #or drop
+
+time:
+  total_model_time: 150000
+  dt: 100
+
+climate:
+  fluvial_freq: 100000 #how often the humid period occurs
+  fluvial_len: 15000 #how long the humid period last
