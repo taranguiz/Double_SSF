@@ -50,13 +50,14 @@ nrows = int(ymax/dxy)
 ncols = int(xmax/dxy)
 
 #TECTONICS AND TIME PARAMETERS
-total_slip= config['tectonics']['total_slip']
-method= config['tectonics']['method']
+total_slip_1= config['tectonics']['total_slip_1']
+total_slip_2= config['tectonics']['total_slip_2']
 total_model_time= config['time']['total_model_time']
 dt= config['time']['dt']
 iterations= np.arange(0,total_model_time,dt)
 print(iterations)
-desired_slip_per_event=(total_slip/total_model_time)*dt
+desired_slip_per_event_1=(total_slip_1/total_model_time)*dt
+desired_slip_per_event_2=(total_slip_2/total_model_time)*dt
 shrink = 0.5
 
 
@@ -86,7 +87,7 @@ sp_crit_sed= config['geomorphology']['sp_crit_sed'] #sediment erosion threshold
 sp_crit_br= config['geomorphology']['sp_crit_br'] #bedrock erosion threshold
 
 #Initialize video maker
-writer = imageio.get_writer(f'/Users/taranguiz/Research/Lateral_advection/output_model_run/{model_name}/{alt_name}.mp4', fps=20)
+# writer = imageio.get_writer(f'/Users/taranguiz/Research/Lateral_advection/output_model_run/{model_name}/{alt_name}.mp4', fps=20)
 
 def add_file_to_writer(filename):
     image=imageio.imread(filename)
@@ -100,9 +101,9 @@ def get_file_sequence(time_step):
     return file_sequence_num
 
 #READING STEADY STATE TOPO
-(mg,z)=read_esri_ascii('/Users/taranguiz/Research/CSDMS_summer_2022/output_new_topo_ddd_5/finaltopo_topographic__elevation.asc', name="topographic__elevation")
-(mg1,soil_0)=read_esri_ascii('/Users/taranguiz/Research/CSDMS_summer_2022/output_new_topo_ddd_5/finaltopo_soil__depth.asc', name='soil__depth')
-(mg2,bed_0)=read_esri_ascii('/Users/taranguiz/Research/CSDMS_summer_2022/output_new_topo_ddd_5/finaltopo_bedrock__elevation.asc', name='bedrock__elevation')
+(mg,z)=read_esri_ascii('/Users/taranguiz/Research/NZ_Tararua_SSF/steady_state_1/finaltopo_topographic__elevation.asc', name="topographic__elevation")
+(mg1,soil_0)=read_esri_ascii('/Users/taranguiz/Research/NZ_Tararua_SSF/steady_state_1/finaltopo_soil__depth.asc', name='soil__depth')
+(mg2,bed_0)=read_esri_ascii('/Users/taranguiz/Research/NZ_Tararua_SSF/steady_state_1/finaltopo_bedrock__elevation.asc', name='bedrock__elevation')
 
 mg.add_field("soil__depth", soil_0, at='node')
 mg.add_field("bedrock__elevation", bed_0, at='node')
@@ -112,10 +113,11 @@ mg.set_closed_boundaries_at_grid_edges(bottom_is_closed=False, left_is_closed=Tr
 shrink = 0.5
 imshow_grid(mg,z, cmap='viridis', shrink=shrink)
 plt.title('Initial Topography')
-write_raster_netcdf(f'{model_name}0000000.nc', mg, format="NETCDF4")
-initial_topo_img = f'/Users/taranguiz/Research/Lateral_advection/output_model_run/{model_name}/{model_name}0000000.png'
-plt.savefig(initial_topo_img, dpi=300, facecolor='white')
-add_file_to_writer(initial_topo_img)
+plt.show()
+# write_raster_netcdf(f'{model_name}0000000.nc', mg, format="NETCDF4")
+# initial_topo_img = f'/Users/taranguiz/Research/Lateral_advection/output_model_run/{model_name}/{model_name}0000000.png'
+# plt.savefig(initial_topo_img, dpi=300, facecolor='white')
+# add_file_to_writer(initial_topo_img)
 
 soil=mg.at_node['soil__depth']
 bed= mg.at_node['bedrock__elevation']
@@ -124,9 +126,13 @@ bed= mg.at_node['bedrock__elevation']
 # print (mg.at_node['bedrock__elevation'][mg.core_nodes])
 # print (mg.at_node['soil__depth'][mg.core_nodes])
 
-fault_loc_y=int(mg.number_of_node_rows / 3.)
-fault_nodes = np.where(mg.node_y==(fault_loc_y*10))[0]
-print(fault_nodes)
+fault_loc_y_1=int(mg.number_of_node_rows / 3.)
+fault_nodes_1 = np.where(mg.node_y==(fault_loc_y_1*10))[0]
+print(fault_nodes_1)
+
+fault_loc_y_2=int(mg.number_of_node_rows / 1.5)
+fault_nodes_2 = np.where(mg.node_y==(fault_loc_y_2*10))[0]
+print(fault_nodes_2)
 
 #instantiate components
 expweath=ExponentialWeatherer(mg, soil_production__maximum_rate=P0, soil_production__decay_depth=Hstar)
@@ -154,13 +160,13 @@ space= SpaceLargeScaleEroder(mg,
                              sp_crit_br=sp_crit_br)
 
 
-#fluvial array (look up table)
-fluvial_freq=config['climate']['fluvial_freq'] #how often the humid period occurs
-fluvial_len=config['climate']['fluvial_len'] #how long the humid period last
-fluvial_0=np.arange(fluvial_freq,total_model_time, fluvial_freq)
-fluvial_n=fluvial_0+fluvial_len
-fluvial_times=np.vstack((fluvial_0,fluvial_n)).T
-print(fluvial_times)
+# #fluvial array (look up table)
+# fluvial_freq=config['climate']['fluvial_freq'] #how often the humid period occurs
+# fluvial_len=config['climate']['fluvial_len'] #how long the humid period last
+# fluvial_0=np.arange(fluvial_freq,total_model_time, fluvial_freq)
+# fluvial_n=fluvial_0+fluvial_len
+# fluvial_times=np.vstack((fluvial_0,fluvial_n)).T
+# print(fluvial_times)
 
 
 #### print parameters to file ####
@@ -181,12 +187,12 @@ print('m_sp: %s' %m_sp, file=open('out_%s.txt' %model_name, 'a'))
 print('n_sp: %s' %n_sp, file=open('out_%s.txt' %model_name, 'a'))
 print('sp_crit_sed: %s' %sp_crit_sed, file=open('out_%s.txt' %model_name, 'a'))
 print('sp_crit_br: %s' %sp_crit_br, file=open('out_%s.txt' %model_name, 'a'))
-print('total_slip: %s' %total_slip, file=open('out_%s.txt' %model_name, 'a'))
-print('method: %s' %method, file=open('out_%s.txt' %model_name, 'a'))
+# print('total_slip: %s' %total_slip, file=open('out_%s.txt' %model_name, 'a'))
+# print('method: %s' %method, file=open('out_%s.txt' %model_name, 'a'))
 print('total_model_time: %s' %total_model_time, file=open('out_%s.txt' %model_name, 'a'))
 print('dt: %s' %dt, file=open('out_%s.txt' %model_name, 'a'))
-print('fluvial_freq: %s' %fluvial_freq, file=open('out_%s.txt' %model_name, 'a'))
-print('fluvial_len: %s' %fluvial_len, file=open('out_%s.txt' %model_name, 'a'))
+# print('fluvial_freq: %s' %fluvial_freq, file=open('out_%s.txt' %model_name, 'a'))
+# print('fluvial_len: %s' %fluvial_len, file=open('out_%s.txt' %model_name, 'a'))
 print('',file=open('out_%s.txt' %model_name, 'a'))
 
 
@@ -194,7 +200,8 @@ print('',file=open('out_%s.txt' %model_name, 'a'))
 time=0 #time counter
 f=0 #index counter for fluvial
 h=0 #index counter for hillslope
-accumulate=0
+accumulate_1=0
+accumulate_2=0
 
 while time < total_model_time:
 
@@ -202,55 +209,45 @@ while time < total_model_time:
       bed[mg.core_nodes]+= (uplift_rate*dt)
       expweath.calc_soil_prod_rate()
       ddtd.run_one_step(dt)
-      # fr.run_one_step()
-      # space.run_one_step(dt)
+      fr.run_one_step()
+      space.run_one_step(dt)
 
-      accumulate += desired_slip_per_event
+      accumulate_1 += desired_slip_per_event_1
+      accumulate_2 += desired_slip_per_event_2
+
       print('is accumulating')
 
-      if accumulate >= mg.dx:
-         ss_fault(grid=mg, fault_loc_y=fault_loc_y, total_slip=total_slip,
-                  total_time=total_model_time, method=method, accumulate=accumulate)
-         accumulate = accumulate % mg.dx
-          # expweath.maximum_weathering_rate=1*1e-6
-          # expweath.calc_soil_prod_rate()
-          # ddtd.run_one_step(dt=1250)
-         print('one slip')
+      if accumulate_1>= mg.dx:
+         ss_fault(grid=mg, fault_loc_y=fault_loc_y_1, total_slip=total_slip_1,
+                  total_time=total_model_time, accumulate=accumulate_1)
+         accumulate_1 = accumulate_1% mg.dx
 
-      if time >= fluvial_times[f,0] and time <= fluvial_times[f,1]:
-          print('is: ' + str(time) +' fluvial time')
-          fr.run_one_step()
-          space.run_one_step(dt)
-          if time == fluvial_times[f,1] and f < (len(fluvial_times)-1):
-              f=f+1
-          if f==(len(fluvial_times)-1):
-              pass
+         print('one slip fault 1')
+      if accumulate_2 >= mg.dx:
+          ss_fault(grid=mg, fault_loc_y=fault_loc_y_2, total_slip=total_slip_2,
+                   total_time=total_model_time, accumulate=accumulate_2)
+          accumulate_2 = accumulate_2 % mg.dx
 
-      # if time >= hillslope_times[h,0] and time <= hillslope_times[h,1]:
-      #     print ('is: ' + str(time) +' so is hola colluvial')
-      #     # expweath.maximum_weathering_rate=1*1e-5
-      #     expweath.calc_soil_prod_rate()
-      #     ddtd.run_one_step(dt)
-      #     if time == hillslope_times[h,1] and h < (len(hillslope_times)-1):
-      #         h=h+1
-      #     if h == (len(hillslope_times)-1):
-      #         pass
+          print('one slip fault 2')
+
+
+
 
       if time>0 and time%200 == 0:
           imshow_grid(mg, z, cmap='viridis', shrink=shrink)
           plt.title('Topography after ' + str(time) + ' years')
-          # plt.show()
+          plt.show()
           # print(mg.at_node.keys())
-          write_raster_netcdf(f'{model_name}{get_file_sequence(time)}.nc', mg, format="NETCDF4",
-                              names=['surface_water__discharge', 'drainage_area',
-                                     'bedrock__elevation', 'soil__depth',
-                                     'sediment__flux', 'soil_production__rate', 'topographic__steepest_slope'])
-          loop_topo_img  = f'/Users/taranguiz/Research/Lateral_advection/output_model_run/{model_name}/{model_name}{get_file_sequence(time)}.png'
-          plt.savefig(
-              loop_topo_img,
-              dpi=300, facecolor='white'
-          )
-          add_file_to_writer(loop_topo_img)
+          # write_raster_netcdf(f'{model_name}{get_file_sequence(time)}.nc', mg, format="NETCDF4",
+          #                     names=['surface_water__discharge', 'drainage_area',
+          #                            'bedrock__elevation', 'soil__depth',
+          #                            'sediment__flux', 'soil_production__rate', 'topographic__steepest_slope'])
+          # loop_topo_img  = f'/Users/taranguiz/Research/Lateral_advection/output_model_run/{model_name}/{model_name}{get_file_sequence(time)}.png'
+          # plt.savefig(
+          #     loop_topo_img,
+          #     dpi=300, facecolor='white'
+          # )
+          # add_file_to_writer(loop_topo_img)
 
           plt.clf()
 
@@ -261,24 +258,24 @@ print(time)
 imshow_grid(mg,z, cmap='viridis', shrink=shrink)
 plt.title('Topography after ' + str(total_model_time) + ' years')
 # plt.show()
-write_raster_netcdf(
-    f'{model_name}{total_model_time}.nc',
-    mg,
-    format="NETCDF4",
-    names=[
-        'surface_water__discharge',
-        'drainage_area',
-        'bedrock__elevation',
-        'soil__depth',
-        'sediment__flux',
-        'soil_production__rate',
-        'topographic__steepest_slope'
-    ]
-)
-final_topo_img= f'/Users/taranguiz/Research/Lateral_advection/output_model_run/{model_name}/{model_name}{total_model_time}.png'
-plt.savefig(final_topo_img, dpi=300, facecolor='white')
-add_file_to_writer(final_topo_img)
-writer.close()
+# write_raster_netcdf(
+#     f'{model_name}{total_model_time}.nc',
+#     mg,
+#     format="NETCDF4",
+#     names=[
+#         'surface_water__discharge',
+#         'drainage_area',
+#         'bedrock__elevation',
+#         'soil__depth',
+#         'sediment__flux',
+#         'soil_production__rate',
+#         'topographic__steepest_slope'
+#     ]
+# )
+# final_topo_img= f'/Users/taranguiz/Research/Lateral_advection/output_model_run/{model_name}/{model_name}{total_model_time}.png'
+# plt.savefig(final_topo_img, dpi=300, facecolor='white')
+# add_file_to_writer(final_topo_img)
+# writer.close()
 # mg.save(f'/Users/taranguiz/Research/Lateral_advection/output_model_run/{model_name}/{model_name}_{total_model_time}.asc')
 
 # figsize = [16,4] # size of grid plots

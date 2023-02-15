@@ -1,9 +1,9 @@
 #config file for parameters
 saving:
-  model_name: 'h_test'
+  model_name: 'try_1'
 
 comments:
-  alt_name: 'ss_20_p1'
+  alt_name: 'testing'
 
 shape:
   ymax: 1000
@@ -29,13 +29,13 @@ geomorphology:
   sp_crit_br: 0.0 #bedrock erosion threshold
 
 tectonics:
-  total_slip: 3000.0
-  method: 'roll' #or drop
+  total_slip_1: 1000.0
+  total_slip_2: 500.0
 
 time:
-  total_model_time: 150000
+  total_model_time: 100000
   dt: 100
 
-climate:
-  fluvial_freq: 100000 #how often the humid period occurs
-  fluvial_len: 15000 #how long the humid period last
+#climate:
+#  fluvial_freq: 100000 #how often the humid period occurs
+#  fluvial_len: 15000 #how long the humid period last
