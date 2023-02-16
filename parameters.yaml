@@ -29,11 +29,11 @@ geomorphology:
   sp_crit_br: 0.0 #bedrock erosion threshold
 
 tectonics:
-  total_slip_1: 1000.0
-  total_slip_2: 500.0
+  total_slip_1: 7000.0
+  total_slip_2: 1000.0
 
 time:
-  total_model_time: 100000
+  total_model_time: 1000000
   dt: 100
 
 #climate:

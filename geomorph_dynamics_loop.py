@@ -126,7 +126,7 @@ bed= mg.at_node['bedrock__elevation']
 # print (mg.at_node['bedrock__elevation'][mg.core_nodes])
 # print (mg.at_node['soil__depth'][mg.core_nodes])
 
-fault_loc_y_1=int(mg.number_of_node_rows / 3.)
+fault_loc_y_1=int(mg.number_of_node_rows / 4.)
 fault_nodes_1 = np.where(mg.node_y==(fault_loc_y_1*10))[0]
 print(fault_nodes_1)
 
